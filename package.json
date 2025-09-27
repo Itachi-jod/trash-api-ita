@@ -1,0 +1,15 @@
+{
+  "name": "meme-api",
+  "version": "1.0.0",
+  "description": "Meme generator API with avatar overlay and Catbox upload",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "axios": "^1.7.0",
+    "canvas": "^2.11.2",
+    "express": "^4.19.2",
+    "form-data": "^4.0.0"
+  }
+}
