@@ -10,7 +10,8 @@
     "@napi-rs/canvas": "latest",
     "axios": "^1.7.0",
     "express": "^4.19.2",
-    "form-data": "^4.0.0"
+    "form-data": "^4.0.0",
+    "sharp": "latest"
   },
   "engines": {
     "node": ">=22.0.0"
