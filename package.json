@@ -7,7 +7,7 @@
     "start": "node index.js"
   },
   "dependencies": {
-    "@napi-rs/canvas": "^0.9.30",
+    "@napi-rs/canvas": "latest",
     "axios": "^1.7.0",
     "express": "^4.19.2",
     "form-data": "^4.0.0"
