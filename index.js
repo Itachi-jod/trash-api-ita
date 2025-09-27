@@ -1,21 +1,26 @@
 const express = require("express");
-const { createCanvas, loadImage } = require("canvas");
+const { createCanvas, loadImage } = require("@napi-rs/canvas");
 const axios = require("axios");
 const FormData = require("form-data");
-const { Readable } = require("stream");
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+
+// Default author
+const DEFAULT_AUTHOR = "MinatoCode";
 
 // Base meme URL
 const BASE_MEME = "https://files.catbox.moe/az80ft.jpg";
 
-// GET /meme?avatar=<url>
-app.get("/meme", async (req, res) => {
+// GET /api/meme?avatar=<url>
+app.get("/api/meme", async (req, res) => {
   try {
     const avatarUrl = req.query.avatar;
     if (!avatarUrl) {
-      return res.status(400).json({ error: "Missing avatar query parameter" });
+      return res.status(400).json({
+        success: false,
+        author: DEFAULT_AUTHOR,
+        error: "Missing avatar query parameter"
+      });
     }
 
     // Load base meme and avatar
@@ -31,11 +36,11 @@ app.get("/meme", async (req, res) => {
     // Draw base meme
     ctx.drawImage(baseImg, 0, 0, baseImg.width, baseImg.height);
 
-    // 🔹 Place avatar at custom coordinates
-    const x = 200;   // horizontal position
-    const y = 250;   // vertical position
-    const w = 180;   // avatar width
-    const h = 180;   // avatar height
+    // 🔹 Place avatar at chosen coordinates
+    const x = 200;
+    const y = 250;
+    const w = 180;
+    const h = 180;
     ctx.drawImage(avatarImg, x, y, w, h);
 
     // Convert canvas to buffer
@@ -53,16 +58,24 @@ app.get("/meme", async (req, res) => {
       headers: form.getHeaders()
     });
 
-    // Respond with Catbox URL
+    // Reply in your custom format
     res.json({
       success: true,
-      url: uploadRes.data
+      author: DEFAULT_AUTHOR,
+      base_meme: BASE_MEME,
+      avatar: avatarUrl,
+      download_url: uploadRes.data
     });
 
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Failed to generate and upload meme" });
+    res.status(500).json({
+      success: false,
+      author: DEFAULT_AUTHOR,
+      error: "Failed to generate and upload meme"
+    });
   }
 });
 
-app.listen(PORT, () => console.log(`✅ Meme API running at http://localhost:${PORT}/meme?avatar=URL`));
+// Export for Vercel
+module.exports = app;
