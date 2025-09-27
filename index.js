@@ -6,7 +6,7 @@ const FormData = require("form-data");
 const app = express();
 
 // Default author
-const DEFAULT_AUTHOR = "MinatoCode";
+const DEFAULT_AUTHOR = "ItachiCodes";
 
 // Base meme URL
 const BASE_MEME = "https://files.catbox.moe/az80ft.jpg";
