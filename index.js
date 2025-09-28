@@ -117,23 +117,25 @@ app.get("/api/meme", async (req, res) => {
     const ctx = canvas.getContext("2d");
     console.log(`Canvas dimensions: ${canvas.width}x${canvas.height}`);
 
-    // Draw base meme
+    // Draw base meme (no blur)
     ctx.drawImage(baseImg, 0, 0, baseImg.width, baseImg.height);
 
-    // Set avatar placement (top-right corner, 10px bigger)
-    const w = 310; // Increased from 300 to 310
-    const h = 310; // Increased from 300 to 310
+    // Set avatar placement (top-right corner, 310x310)
+    const w = 310; // Size from previous request
+    const h = 310; // Size from previous request
     const x = baseImg.width - w; // Align right edge with base image's right edge
     const y = 0; // Align top edge with base image's top edge
     console.log(`Placing avatar at: x=${x}, y=${y}, w=${w}, h=${h}`);
 
-    // Resize avatar
-    console.log("Resizing avatar");
+    // Resize and blur avatar
+    console.log("Resizing and blurring avatar");
     const avatarCanvas = createCanvas(w, h);
     const avatarCtx = avatarCanvas.getContext("2d");
+    avatarCtx.filter = "blur(2px)"; // Apply slight blur to avatar only
     avatarCtx.drawImage(avatarImg, 0, 0, w, h);
+    avatarCtx.filter = "none"; // Reset filter to avoid affecting other operations
 
-    // Draw resized avatar
+    // Draw resized and blurred avatar
     ctx.drawImage(avatarCanvas, x, y, w, h);
 
     // Convert to buffer and compress
@@ -185,7 +187,8 @@ app.get("/api/meme", async (req, res) => {
       base_meme: baseImg.src === FALLBACK_BASE_MEME ? "fallback:base64" : "local:BASE_MEME.jpeg",
       avatar: avatarUrl,
       download_url: downloadUrl,
-      placement: { x, y, w, h }
+      placement: { x, y, w, h },
+      blur: "2px"
     });
 
   } catch (err) {
