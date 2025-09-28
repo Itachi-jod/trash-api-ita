@@ -83,15 +83,16 @@ app.get("/api/meme", async (req, res) => {
     console.log(`Attempting to load base meme from: ${BASE_MEME_PATH}`);
     let baseImg;
     try {
-      // Check if file exists
       await fs.access(BASE_MEME_PATH);
       console.log("Base meme file found, loading...");
       const baseMemeBuffer = await fs.readFile(BASE_MEME_PATH);
       baseImg = await loadImage(baseMemeBuffer);
+      console.log(`Base image dimensions: ${baseImg.width}x${baseImg.height}`);
     } catch (err) {
       console.error(`Failed to load base meme: ${err.message}`);
       console.log("Falling back to base64 placeholder image");
       baseImg = await loadImage(FALLBACK_BASE_MEME);
+      console.log(`Fallback base image dimensions: ${baseImg.width}x${baseImg.height}`);
     }
 
     // Fetch and load avatar as ArrayBuffer
@@ -100,6 +101,7 @@ app.get("/api/meme", async (req, res) => {
     try {
       const avatarBuffer = await retryRequest(() => fetchImageAsArrayBuffer(avatarUrl));
       avatarImg = await loadImage(Buffer.from(avatarBuffer));
+      console.log(`Avatar image dimensions: ${avatarImg.width}x${avatarImg.height}`);
     } catch (err) {
       console.error("Failed to load avatar image:", err.message);
       return res.status(400).json({
@@ -113,15 +115,19 @@ app.get("/api/meme", async (req, res) => {
     console.log("Creating canvas");
     const canvas = createCanvas(baseImg.width, baseImg.height);
     const ctx = canvas.getContext("2d");
+    console.log(`Canvas dimensions: ${canvas.width}x${canvas.height}`);
 
     // Draw base meme
     ctx.drawImage(baseImg, 0, 0, baseImg.width, baseImg.height);
 
+    // Set avatar placement (top-right corner, twice the size)
+    const w = 300; // Twice the original 150
+    const h = 300; // Twice the original 150
+    const x = baseImg.width - w; // Align right edge with base image's right edge
+    const y = 0; // Align top edge with base image's top edge
+    console.log(`Placing avatar at: x=${x}, y=${y}, w=${w}, h=${h}`);
+
     // Resize avatar
-    const x = 200;
-    const y = 250;
-    const w = 180;
-    const h = 180;
     console.log("Resizing avatar");
     const avatarCanvas = createCanvas(w, h);
     const avatarCtx = avatarCanvas.getContext("2d");
@@ -178,7 +184,8 @@ app.get("/api/meme", async (req, res) => {
       author: DEFAULT_AUTHOR,
       base_meme: baseImg.src === FALLBACK_BASE_MEME ? "fallback:base64" : "local:BASE_MEME.jpeg",
       avatar: avatarUrl,
-      download_url: downloadUrl
+      download_url: downloadUrl,
+      placement: { x, y, w, h }
     });
 
   } catch (err) {
