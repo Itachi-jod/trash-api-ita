@@ -11,8 +11,11 @@ const app = express();
 // Default author
 const DEFAULT_AUTHOR = "ItachiCodes";
 
-// Path to local base meme file
-const BASE_MEME_PATH = path.join(__dirname, "public", "BASE_MEME.jpeg");
+// Path to local base meme file (in project root)
+const BASE_MEME_PATH = path.join(__dirname, "BASE_MEME.jpeg");
+
+// Fallback base meme (small placeholder image as base64)
+const FALLBACK_BASE_MEME = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAABTSURBVFhH7c6xCQAwDAJQ+/9f2aAQIYJLoAEO4GBAgJ0BAXYGBAgJBAgJBAgJBAgJBAgJBAgJBAgJBAgJBAgJBAgJBAgJBAgJBAgJBAgJBAgJBAgJBAgJBAgJ7Q0G1jZ2h0kAAAAASUVORK5CYII=";
 
 // Validate image URL
 const validateImageUrl = async (url, timeout = 5000) => {
@@ -77,18 +80,18 @@ app.get("/api/meme", async (req, res) => {
     await validateImageUrl(avatarUrl);
 
     // Load base meme from local file
-    console.log("Loading base meme from local file");
+    console.log(`Attempting to load base meme from: ${BASE_MEME_PATH}`);
     let baseImg;
     try {
+      // Check if file exists
+      await fs.access(BASE_MEME_PATH);
+      console.log("Base meme file found, loading...");
       const baseMemeBuffer = await fs.readFile(BASE_MEME_PATH);
       baseImg = await loadImage(baseMemeBuffer);
     } catch (err) {
-      console.error("Failed to load local base meme:", err.message);
-      return res.status(500).json({
-        success: false,
-        author: DEFAULT_AUTHOR,
-        error: `Failed to load base meme: ${err.message}`
-      });
+      console.error(`Failed to load base meme: ${err.message}`);
+      console.log("Falling back to base64 placeholder image");
+      baseImg = await loadImage(FALLBACK_BASE_MEME);
     }
 
     // Fetch and load avatar as ArrayBuffer
@@ -156,13 +159,12 @@ app.get("/api/meme", async (req, res) => {
       console.log("Upload successful");
     } catch (uploadErr) {
       console.error("Catbox upload failed:", uploadErr.message);
-      // Fallback: Return image as base64
       console.log("Falling back to base64 response");
       const base64Image = compressedBuffer.toString("base64");
       return res.json({
         success: true,
         author: DEFAULT_AUTHOR,
-        base_meme: "local:BASE_MEME.jpeg",
+        base_meme: baseImg.src === FALLBACK_BASE_MEME ? "fallback:base64" : "local:BASE_MEME.jpeg",
         avatar: avatarUrl,
         download_url: null,
         fallback_base64: `data:image/png;base64,${base64Image}`,
@@ -174,7 +176,7 @@ app.get("/api/meme", async (req, res) => {
     res.json({
       success: true,
       author: DEFAULT_AUTHOR,
-      base_meme: "local:BASE_MEME.jpeg",
+      base_meme: baseImg.src === FALLBACK_BASE_MEME ? "fallback:base64" : "local:BASE_MEME.jpeg",
       avatar: avatarUrl,
       download_url: downloadUrl
     });
