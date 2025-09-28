@@ -120,9 +120,9 @@ app.get("/api/meme", async (req, res) => {
     // Draw base meme
     ctx.drawImage(baseImg, 0, 0, baseImg.width, baseImg.height);
 
-    // Set avatar placement (top-right corner, twice the size)
-    const w = 300; // Twice the original 150
-    const h = 300; // Twice the original 150
+    // Set avatar placement (top-right corner, 10px bigger)
+    const w = 310; // Increased from 300 to 310
+    const h = 310; // Increased from 300 to 310
     const x = baseImg.width - w; // Align right edge with base image's right edge
     const y = 0; // Align top edge with base image's top edge
     console.log(`Placing avatar at: x=${x}, y=${y}, w=${w}, h=${h}`);
