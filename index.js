@@ -131,7 +131,7 @@ app.get("/api/meme", async (req, res) => {
     console.log("Resizing and blurring avatar");
     const avatarCanvas = createCanvas(w, h);
     const avatarCtx = avatarCanvas.getContext("2d");
-    avatarCtx.filter = "blur(2px)"; // Apply slight blur to avatar only
+    avatarCtx.filter = "blur(7px)"; // Apply slight blur to avatar only
     avatarCtx.drawImage(avatarImg, 0, 0, w, h);
     avatarCtx.filter = "none"; // Reset filter to avoid affecting other operations
 
